@@ -1,0 +1,90 @@
+schema: ./beep.perm
+
+relationships:
+  - "member:1#user@user:1"
+  - "member:2#user@user:2"
+  - "server:1#owner@member:1"
+  - "server:1#member@member:1"
+  - "server:1#member@member:2"
+  - "role:1#member@member:1"
+  - "role:2#member@member:2"
+  - "channel:1#dmUser@user:1"
+  - "channel:1#server@server:1"
+  - "channel:1#messageSender@role:1#member"
+  - "channel:1#attachmentSender@role:1#member"
+  - "channel:1#editor@role:1#member"
+  - "channel:1#viewer@role:1#member"
+  - "message:1#owner@user:1"
+  - "message:1#server@server:1"
+  - "message:1#channel@channel:1"
+  - "message:1#pinner@role:1#member"
+  - "message:1#messageManager@role:1#member"
+
+scenarios:
+  - name: "User1 can send a message in Channel1"
+    description: "Check if User1 can send a message in Channel1"
+    checks:
+      - entity: "channel:1"
+        subject: "user:1"
+        assertions:
+          sendMessage: true
+
+  - name: "User2 cannot send a message in Channel1"
+    description: "Check if User2 cannot send a message in Channel1"
+    checks:
+      - entity: "channel:1"
+        subject: "user:2"
+        assertions:
+          sendMessage: false
+
+  - name: "User1 can edit Message1"
+    description: "Check if User1 can edit Message1"
+    checks:
+      - entity: "message:1"
+        subject: "user:1"
+        assertions:
+          edit: true
+
+  - name: "User2 cannot edit Message1"
+    description: "Check if User2 cannot edit Message1"
+    checks:
+      - entity: "message:1"
+        subject: "user:2"
+        assertions:
+          edit: false
+
+  - name: "User1 can view Channel1"
+    description: "Check if User1 can view Channel1"
+    checks:
+      - entity: "channel:1"
+        subject: "user:1"
+        assertions:
+          view: true
+
+  - name: "User2 can view Channel1"
+    description: "Check if User2 can view Channel1"
+    checks:
+      - entity: "channel:1"
+        subject: "user:2"
+        assertions:
+          view: true
+
+entity_filters:
+  - entity_type: "channel"
+    subject: "user:1"
+    context:
+      - "channel:1#dmUser@user:1"
+      - "channel:2#dmUser@user:1"
+      - "channel:3#dmUser@user:1"
+    assertions:
+      sendMessage: ["1", "2", "3"]
+      view: ["1", "2", "3"]
+
+subject_filters:
+  - subject_reference: "user"
+    entity: "channel:1"
+    context:
+      - "server:1#member@member:2"
+    assertions:
+      sendMessage: ["1"]
+      view: ["1", "2"]

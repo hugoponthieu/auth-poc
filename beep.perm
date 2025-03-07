@@ -1,0 +1,46 @@
+entity user {}
+
+entity member {
+    relation user @user
+}
+
+entity server {
+    relation owner @member
+    relation member @member
+}
+
+entity role {
+    relation member @member
+}
+
+entity channel {
+    attribute type string
+
+    relation dmUser @user 
+    relation server @server
+
+    relation messageSender @role#member
+    relation attachmentSender @role#member
+    relation editor @role#member
+    relation viewer @role#member
+
+    permission sendMessage = dmUser or server.owner or messageSender
+    permission sendAttachments = dmUser or server.owner or attachmentSender
+    permission edit = dmUser or server.owner or editor
+    permission view = dmUser or server.member or viewer
+    permission addMember = dmUser
+}   
+
+entity message {
+    relation owner @user
+    relation server @server
+    relation channel @channel
+
+    relation pinner @role#member
+    relation messageManager @role#member
+
+    permission edit = owner
+    permission delete = owner or server.owner or channel.server
+    permission view = channel.dmUser or channel.viewer
+    permission pin = pinner
+}

@@ -1,0 +1,75 @@
+services:
+  permify:
+    image: permify/permify:latest
+    container_name: permify
+    ports:
+      - "3476:3476"
+      - "3478:3478"
+      - "6060:6060"
+    environment:
+      - ACCOUNT_ID=${ACCOUNT_ID}
+      - SERVER_RATE_LIMIT=100
+      - SERVER_HTTP_ENABLED=true
+      - SERVER_HTTP_PORT=3476
+      - SERVER_HTTP_TLS_ENABLED=false
+      - SERVER_HTTP_TLS_CERT=/etc/letsencrypt/live/yourdomain.com/fullchain.pem
+      - SERVER_HTTP_TLS_KEY=/etc/letsencrypt/live/yourdomain.com/privkey.pem
+      - SERVER_GRPC_PORT=3478
+      - SERVER_GRPC_TLS_ENABLED=false
+      - SERVER_GRPC_TLS_CERT=/etc/letsencrypt/live/yourdomain.com/fullchain.pem
+      - SERVER_GRPC_TLS_KEY=/etc/letsencrypt/live/yourdomain.com/privkey.pem
+      - LOGGER_LEVEL=info
+      - LOGGER_FILE=""
+      - PROFILER_ENABLED=true
+      - PROFILER_PORT=6060
+      - AUTHN_ENABLED=false
+      - AUTHN_METHOD=preshared
+      - AUTHN_PRESHARED_KEYS=[]
+      - TRACER_EXPORTER=zipkin
+      - TRACER_ENDPOINT=http://localhost:9411/api/v2/spans
+      - TRACER_ENABLED=false
+      - METER_EXPORTER=otlp
+      - METER_ENDPOINT=localhost:4318
+      - METER_ENABLED=false
+      - SERVICE_CIRCUIT_BREAKER=false
+      - SERVICE_WATCH_ENABLED=false
+      - SERVICE_SCHEMA_CACHE_NUMBER_OF_COUNTERS=1000
+      - SERVICE_SCHEMA_CACHE_MAX_COST=10MiB
+      - SERVICE_PERMISSION_BULK_LIMIT=100
+      - SERVICE_PERMISSION_CONCURRENCY_LIMIT=100
+      - SERVICE_PERMISSION_CACHE_NUMBER_OF_COUNTERS=10000
+      - SERVICE_PERMISSION_CACHE_MAX_COST=10MiB
+      - DATABASE_ENGINE=postgres
+      - DATABASE_URI=postgres://user:password@postgres:5432/db_name
+      - DATABASE_AUTO_MIGRATE=false
+      - DATABASE_MAX_OPEN_CONNECTIONS=20
+      - DATABASE_MAX_IDLE_CONNECTIONS=1
+      - DATABASE_MAX_CONNECTION_LIFETIME=300s
+      - DATABASE_MAX_CONNECTION_IDLE_TIME=60s
+      - DATABASE_MAX_DATA_PER_WRITE=1000
+      - DATABASE_MAX_RETRIES=10
+      - DATABASE_WATCH_BUFFER_SIZE=100
+      - DATABASE_GARBAGE_COLLECTION_ENABLED=true
+      - DATABASE_GARBAGE_COLLECTION_INTERVAL=200h
+      - DATABASE_GARBAGE_COLLECTION_WINDOW=200h
+      - DATABASE_GARBAGE_COLLECTION_TIMEOUT=5m
+      - DISTRIBUTED_ENABLED=true
+      - DISTRIBUTED_ADDRESS=kubernetes:///permify.default:5000
+      - DISTRIBUTED_PORT=5000
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: db_name
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
